@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавить контент{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 40px auto; background: white; border: 1px solid #dbdbdb; padding: 30px; border-radius: 12px; text-align: center;">
+
+    <h1 style="font-family: 'Comic Sans MS', cursive; margin-bottom: 25px;">
+        Добавить контент
+    </h1>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+        <button type="button" onclick="showForm('post')" id="postTab"
+            style="flex:1; background:#0095f6; color:white; border:none; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">
+            Пост
+        </button>
+
+        <button type="button" onclick="showForm('story')" id="storyTab"
+            style="flex:1; background:#efefef; color:black; border:none; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">
+            Сторис
+        </button>
+    </div>
+
+    <style>
+        .custom-form p {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .custom-form input,
+        .custom-form textarea,
+        .custom-form select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #dbdbdb;
+            background: #fafafa;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .hidden-form {
+            display: none;
+        }
+
+        .mini-note {
+            font-size: 13px;
+            color: #777;
+            margin-top: -5px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+    </style>
+
+    <div id="postFormBlock">
+        <form method="post" enctype="multipart/form-data" class="custom-form" style="text-align: left;">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button type="submit"
+                style="width: 100%; background: #0095f6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+                Опубликовать пост
+            </button>
+        </form>
+    </div>
+
+    <div id="storyFormBlock" class="hidden-form">
+        <form method="post" action="{% url 'add_story' %}" enctype="multipart/form-data" class="custom-form" style="text-align: left;">
+            {% csrf_token %}
+
+            <p>
+                <label for="storyImage">Фото для сторис:</label>
+                <input type="file" name="image" id="storyImage" accept="image/*">
+            </p>
+
+            <p>
+                <label for="storyVideo">Видео для сторис:</label>
+                <input type="file" name="video" id="storyVideo" accept="video/*">
+            </p>
+
+            <div class="mini-note">
+                Загрузи либо фото, либо видео.
+            </div>
+
+            <button type="submit"
+                style="width: 100%; background: #ff3040; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px;">
+                Опубликовать сторис
+            </button>
+        </form>
+    </div>
+
+    <p style="margin-top: 20px;">
+        <a href="{% url 'home' %}" style="color: #0095f6; text-decoration: none; font-size: 14px;">Отмена</a>
+    </p>
+</div>
+
+<script>
+    function showForm(type) {
+        const postForm = document.getElementById('postFormBlock');
+        const storyForm = document.getElementById('storyFormBlock');
+
+        const postTab = document.getElementById('postTab');
+        const storyTab = document.getElementById('storyTab');
+
+        if (type === 'post') {
+            postForm.style.display = 'block';
+            storyForm.style.display = 'none';
+
+            postTab.style.background = '#0095f6';
+            postTab.style.color = 'white';
+
+            storyTab.style.background = '#efefef';
+            storyTab.style.color = 'black';
+        } else {
+            postForm.style.display = 'none';
+            storyForm.style.display = 'block';
+
+            storyTab.style.background = '#0095f6';
+            storyTab.style.color = 'white';
+
+            postTab.style.background = '#efefef';
+            postTab.style.color = 'black';
+        }
+    }
+</script>
+{% endblock %}

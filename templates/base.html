@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Instagram{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding-top: 130px;
+            background-color: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .chat-icon {
+            position: relative;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: red;
+            color: white;
+            font-size: 11px;
+            padding: 4px 6px;
+            border-radius: 50%;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: white;
+            border-bottom: 1px solid #dbdbdb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            width: 100%;
+            max-width: 975px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 24px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-box {
+            background-color: #efefef;
+            border-radius: 8px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            width: 250px;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            padding: 7px;
+            outline: none;
+            width: 100%;
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: 45px;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: none;
+            max-height: 350px;
+            overflow-y: auto;
+            z-index: 2000;
+        }
+
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            text-decoration: none;
+            color: black;
+            border-bottom: 1px solid #efefef;
+        }
+
+        .search-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-item:hover {
+            background-color: #fafafa;
+        }
+
+        .search-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #efefef;
+        }
+
+        .search-username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .search-bio {
+            color: #8e8e8e;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .search-empty {
+            padding: 14px;
+            color: #8e8e8e;
+            font-size: 14px;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+
+        .nav-icons a {
+            color: black;
+            font-size: 24px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-link {
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            color: #0095f6;
+        }
+
+        .stories-bar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 20px;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+        }
+
+        .stories-inner {
+            width: 100%;
+            max-width: 975px;
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            align-items: center;
+        }
+
+        .story-btn {
+            border: none;
+            background: transparent;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 72px;
+        }
+
+        .story-ring {
+            width: 66px;
+            height: 66px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #eee;
+            border: 2px solid #fff;
+            display: block;
+        }
+
+        .story-username-under {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #262626;
+            max-width: 72px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+
+        .main-content {
+            max-width: 975px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .story-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            padding: 20px;
+        }
+
+        .story-modal.active {
+            display: flex;
+        }
+
+        .story-modal-content {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 80vh;
+            max-height: 760px;
+            background: #111;
+            border-radius: 18px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .story-progress {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            height: 4px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 999px;
+            overflow: hidden;
+            z-index: 20;
+        }
+
+        .story-progress-bar {
+            width: 0%;
+            height: 100%;
+            background: white;
+            transition: width linear;
+        }
+
+        .story-header {
+            position: absolute;
+            top: 24px;
+            left: 14px;
+            right: 14px;
+            z-index: 21;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .story-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .story-user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #ddd;
+        }
+
+        .story-username {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .story-close {
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .story-body {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: black;
+        }
+
+        .story-body img,
+        .story-body video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: black;
+        }
+
+        .story-nav-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            z-index: 19;
+            cursor: pointer;
+        }
+
+        .story-nav-left {
+            left: 0;
+        }
+
+        .story-nav-right {
+            right: 0;
+        }
+
+        @media (max-width: 600px) {
+            .search-box {
+                width: 170px;
+            }
+
+            .story-modal-content {
+                max-width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">Instagram</a>
+
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <i class="bi bi-search" style="color: #8e8e8e; font-size: 14px;"></i>
+                    <input type="text" id="searchInput" placeholder="Поиск">
+                </div>
+
+                <div class="search-dropdown" id="searchDropdown"></div>
+            </div>
+
+            <div class="nav-icons">
+                <a href="/"><i class="bi bi-house-door-fill"></i></a>
+
+                {% if user.is_authenticated %}
+                <a href="{% url 'chat_list' %}" class="chat-icon">
+                    <i class="bi bi-send"></i>
+                    {% if unread_count > 0 %}
+                    <span class="badge">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+
+                <a href="{% url 'add_post' %}"><i class="bi bi-plus-square"></i></a>
+                <a href="{% url 'explore' %}"><i class="bi bi-compass"></i></a>
+                <a href="{% url 'reels' %}"><i class="bi bi-film"></i></a>
+                <a href="#"><i class="bi bi-heart"></i></a>
+                <a href="{% url 'profile' %}"><i class="bi bi-person-circle"></i></a>
+                <a href="{% url 'logout' %}">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}" class="auth-link">Login</a>
+                <a href="{% url 'register' %}" class="auth-link">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if user.is_authenticated %}
+    <div class="stories-bar">
+        <div class="stories-inner">
+            {% for story in stories %}
+                <button
+                    type="button"
+                    class="story-btn"
+                    data-story-index="{{ forloop.counter0 }}"
+                    data-story-id="{{ story.id }}"
+                    data-story-username="{{ story.user.username }}"
+                    data-story-avatar="{{ story.user.avatar.url }}"
+                    data-story-image="{% if story.image %}{{ story.image.url }}{% endif %}"
+                    data-story-video="{% if story.video %}{{ story.video.url }}{% endif %}"
+                >
+                    <div class="story-ring">
+                        <img src="{{ story.user.avatar.url }}"
+                             onerror="this.src='/media/avatar.jpg';"
+                             class="story-avatar"
+                             alt="{{ story.user.username }}">
+                    </div>
+                    <div class="story-username-under">{{ story.user.username }}</div>
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="main-content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <div class="story-modal" id="storyModal">
+        <div class="story-modal-content" id="storyModalContent">
+            <div class="story-progress">
+                <div class="story-progress-bar" id="storyProgressBar"></div>
+            </div>
+
+            <div class="story-header">
+                <div class="story-user">
+                    <img id="storyUserAvatar"
+                         class="story-user-avatar"
+                         src=""
+                         onerror="this.src='/media/avatar.jpg';"
+                         alt="avatar">
+                    <div id="storyUsername" class="story-username"></div>
+                </div>
+
+                <button class="story-close" id="storyCloseBtn" type="button">&times;</button>
+            </div>
+
+            <div class="story-nav-zone story-nav-left" id="storyPrev"></div>
+            <div class="story-nav-zone story-nav-right" id="storyNext"></div>
+
+            <div class="story-body" id="storyBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const query = this.value.trim();
+
+                if (query.length === 0) {
+                    searchDropdown.style.display = 'none';
+                    searchDropdown.innerHTML = '';
+                    return;
+                }
+
+                fetch(`/search-users/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        searchDropdown.innerHTML = '';
+
+                        if (data.users.length > 0) {
+                            data.users.forEach(user => {
+                                const userItem = document.createElement('a');
+                                userItem.href = user.profile_url;
+                                userItem.className = 'search-item';
+
+                                userItem.innerHTML = `
+                                    <img src="${user.avatar}" class="search-avatar" onerror="this.src='/media/avatar.jpg';" alt="${user.username}">
+                                    <div>
+                                        <div class="search-username">${user.username}</div>
+                                        <div class="search-bio">${user.bio ? user.bio : ''}</div>
+                                    </div>
+                                `;
+
+                                searchDropdown.appendChild(userItem);
+                            });
+                        } else {
+                            searchDropdown.innerHTML = `<div class="search-empty">Ничего не найдено</div>`;
+                        }
+
+                        searchDropdown.style.display = 'block';
+                    });
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!event.target.closest('.search-wrapper')) {
+                    searchDropdown.style.display = 'none';
+                }
+            });
+        }
+
+        const storyButtons = Array.from(document.querySelectorAll('.story-btn'));
+        const storyModal = document.getElementById('storyModal');
+        const storyBody = document.getElementById('storyBody');
+        const storyUsername = document.getElementById('storyUsername');
+        const storyUserAvatar = document.getElementById('storyUserAvatar');
+        const storyCloseBtn = document.getElementById('storyCloseBtn');
+        const storyPrev = document.getElementById('storyPrev');
+        const storyNext = document.getElementById('storyNext');
+        const storyProgressBar = document.getElementById('storyProgressBar');
+
+        let currentStoryIndex = 0;
+        let storyTimer = null;
+
+        function getStoriesData() {
+            return storyButtons.map(btn => ({
+                username: btn.dataset.storyUsername || '',
+                avatar: btn.dataset.storyAvatar || '',
+                image: btn.dataset.storyImage || '',
+                video: btn.dataset.storyVideo || ''
+            }));
+        }
+
+        function resetProgress(duration = 5000) {
+            storyProgressBar.style.transition = 'none';
+            storyProgressBar.style.width = '0%';
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    storyProgressBar.style.transition = `width ${duration}ms linear`;
+                    storyProgressBar.style.width = '100%';
+                });
+            });
+        }
+
+        function clearStoryTimer() {
+            if (storyTimer) {
+                clearTimeout(storyTimer);
+                storyTimer = null;
+            }
+        }
+
+        function closeStoryModal() {
+            clearStoryTimer();
+            storyModal.classList.remove('active');
+            storyBody.innerHTML = '';
+            document.body.style.overflow = '';
+        }
+
+        function openStoryModal(index) {
+            currentStoryIndex = index;
+            renderStory(index);
+            storyModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function renderStory(index) {
+            const stories = getStoriesData();
+            if (!stories.length) return;
+
+            if (index < 0) index = stories.length - 1;
+            if (index >= stories.length) index = 0;
+
+            currentStoryIndex = index;
+            clearStoryTimer();
+
+            const story = stories[index];
+
+            storyUsername.textContent = story.username || 'user';
+            storyUserAvatar.src = story.avatar || '/media/avatar.jpg';
+            storyBody.innerHTML = '';
+
+            if (story.image) {
+                const img = document.createElement('img');
+                img.src = story.image;
+                img.alt = 'story image';
+                storyBody.appendChild(img);
+
+                resetProgress(5000);
+                storyTimer = setTimeout(() => {
+                    renderStory(currentStoryIndex + 1);
+                }, 5000);
+            } else if (story.video) {
+                const video = document.createElement('video');
+                video.src = story.video;
+                video.autoplay = true;
+                video.controls = false;
+                video.muted = false;
+                video.playsInline = true;
+
+                video.addEventListener('loadedmetadata', () => {
+                    const durationMs = Math.max((video.duration || 5) * 1000, 1000);
+                    resetProgress(durationMs);
+                });
+
+                video.addEventListener('ended', () => {
+                    renderStory(currentStoryIndex + 1);
+                });
+
+                storyBody.appendChild(video);
+            }
+        }
+
+        storyButtons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                openStoryModal(index);
+            });
+        });
+
+        if (storyCloseBtn) {
+            storyCloseBtn.addEventListener('click', closeStoryModal);
+        }
+
+        if (storyModal) {
+            storyModal.addEventListener('click', function(e) {
+                if (e.target === storyModal) {
+                    closeStoryModal();
+                }
+            });
+        }
+
+        if (storyPrev) {
+            storyPrev.addEventListener('click', function(e) {
+                e.stopPropagation();
+                renderStory(currentStoryIndex - 1);
+            });
+        }
+
+        if (storyNext) {
+            storyNext.addEventListener('click', function(e) {
+                e.stopPropagation();
+                renderStory(currentStoryIndex + 1);
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (!storyModal.classList.contains('active')) return;
+
+            if (e.key === 'Escape') closeStoryModal();
+            if (e.key === 'ArrowLeft') renderStory(currentStoryIndex - 1);
+            if (e.key === 'ArrowRight') renderStory(currentStoryIndex + 1);
+        });
+    </script>
+
+</body>
+</html>

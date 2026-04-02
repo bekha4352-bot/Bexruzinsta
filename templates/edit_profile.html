@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+/* Background va overall layout */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    color: #333;
+}
+
+/* Form container */
+.form-wrapper {
+    max-width: 500px;
+    margin: 50px auto;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Heading */
+.form-wrapper h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #111;
+    font-size: 28px;
+}
+
+/* Form elements */
+.form-wrapper form p {
+    margin-bottom: 15px;
+}
+
+.form-wrapper input,
+.form-wrapper select,
+.form-wrapper textarea {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.form-wrapper input:focus,
+.form-wrapper select:focus,
+.form-wrapper textarea:focus {
+    border-color: #0095f6;
+    box-shadow: 0 0 5px rgba(0,149,246,0.5);
+}
+
+/* Submit button */
+.form-wrapper button {
+    width: 100%;
+    padding: 12px;
+    background: #0095f6;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: 0.3s;
+}
+
+.form-wrapper button:hover {
+    background: #007acc;
+}
+
+/* Back link */
+.form-wrapper p a {
+    display: inline-block;
+    margin-top: 15px;
+    text-decoration: none;
+    color: #0095f6;
+    transition: 0.3s;
+}
+
+.form-wrapper p a:hover {
+    text-decoration: underline;
+    color: #007acc;
+}
+</style>
+
+<div class="form-wrapper">
+    <h1>Редактировать профиль</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Сохранить</button>
+    </form>
+
+    <p><a href="{% url 'profile' %}">Назад в профиль</a></p>
+</div>
+
+{% endblock %}

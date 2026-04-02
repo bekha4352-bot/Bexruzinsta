@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Add Reel{% endblock %}
+{% block content %}
+<div style="max-width: 520px; margin: 0 auto; background:white; border:1px solid #dbdbdb; border-radius:12px; padding:20px;">
+    <h2>Add Reel</h2>
+    {% if error %}<p style="color:red;">{{ error }}</p>{% endif %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="margin-bottom:12px;">
+            <label>Video</label><br>
+            <input type="file" name="video" accept="video/*" required>
+        </div>
+        <div style="margin-bottom:12px;">
+            <label>Caption</label><br>
+            <input type="text" name="caption" style="width:100%; padding:10px; box-sizing:border-box;">
+        </div>
+        <button type="submit" style="background:#0095f6; color:white; border:none; padding:10px 14px; border-radius:8px;">Upload</button>
+    </form>
+</div>
+{% endblock %}

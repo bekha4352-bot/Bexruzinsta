@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Tanlang nima qo'yishni xohlaysiz:</h2>
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit" name="choice" value="post">Post</button>
+    <button type="submit" name="choice" value="story">Storis</button>
+</form>
+{% endblock %}

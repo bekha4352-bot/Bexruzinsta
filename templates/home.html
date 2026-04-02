@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная — Instagram{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding-top: 20px;">
+    
+    {% if user.is_authenticated %}
+        <p style="color: #8e8e8e;">Добро пожаловать, <strong>{{ user.username }}</strong>!</p>
+    {% endif %}
+
+    {% if query %}
+        <div style="background: white; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 25px;">
+            <div style="padding: 14px; border-bottom: 1px solid #efefef; font-weight: 600;">
+                Результаты поиска
+            </div>
+
+            {% if users %}
+                {% for found_user in users %}
+                    <div style="padding: 14px; display: flex; align-items: center; border-bottom: 1px solid #efefef;">
+                        <i class="bi bi-person-circle" style="font-size: 24px; margin-right: 10px;"></i>
+                        <div>
+                            <div style="font-weight: 600;">{{ found_user.username }}</div>
+                            {% if found_user.bio %}
+                                <div style="color: #8e8e8e; font-size: 14px;">{{ found_user.bio }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="padding: 14px; color: #8e8e8e;">
+                    Пользователи не найдены.
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <h2 style="font-weight: 600; margin-bottom: 20px;">Лента постов</h2>
+
+    {% for post in posts %}
+        <div style="background: white; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 40px;" id="post-{{ post.id }}">
+            
+            <!-- HEADER -->
+            <div style="padding: 14px; display: flex; align-items: center; border-bottom: 1px solid #efefef;">
+                <a style="display: flex; align-items: center; gap: 10px; text-decoration: none;" 
+                   href="{% url 'user_profile' post.author.username %}">
+                    <img width="30" src="{{ post.author.avatar.url }}">
+                    <span style="font-weight: 600;">{{ post.author.username }}</span>
+                </a>
+            </div>
+
+            <!-- MEDIA -->
+            <div style="background-color: #fafafa; display: flex; justify-content: center;">
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" style="max-width: 100%;">
+                {% elif post.video %}
+                    <video style="max-width: 100%;" controls>
+                        <source src="{{ post.video.url }}">
+                    </video>
+                {% endif %}
+            </div>
+
+            <!-- BODY -->
+            <div style="padding: 16px;">
+
+                <!-- ❤️ LIKE -->
+                <div style="margin-bottom: 8px;">
+                    <a href="#" class="like-btn" data-post-id="{{ post.id }}" style="text-decoration:none;">
+                        {% if post.is_liked %}
+                            <i class="bi bi-heart-fill" style="font-size:24px; color:red;"></i>
+                        {% else %}
+                            <i class="bi bi-heart" style="font-size:24px;"></i>
+                        {% endif %}
+                    </a>
+                    <span class="like-count" id="like-count-{{ post.id }}" style="margin-left:10px; font-weight:500;">
+                        {{ post.like_count }}
+                    </span>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <p style="margin: 0 0 5px 0;">
+                    <strong>{{ post.author.username }}</strong> 
+                    {{ post.description|truncatechars:100 }}
+                </p>
+
+                <!-- COMMENTS LIST -->
+                <div class="comments" id="comments-{{ post.id }}" style="margin-top:10px;">
+                    {% for comment in post.comments %}
+                        <div style="font-size:14px;">
+                            <b>{{ comment.user.username }}</b> {{ comment.text }}
+                        </div>
+                    {% empty %}
+                        <div style="color:#8e8e8e; font-size:14px;">Комментариев нет</div>
+                    {% endfor %}
+                </div>
+
+                <!-- ADD COMMENT -->
+                <form class="comment-form" data-post-id="{{ post.id }}" style="margin-top:10px; display:flex;">
+                    {% csrf_token %}
+                    <input type="text" name="text" placeholder="Добавить комментарий..."
+                           style="flex:1; border:none; border-bottom:1px solid #ccc; outline:none;">
+                    <button style="background:none; border:none; color:#0095f6;">Post</button>
+                </form>
+
+                <!-- VIEWS -->
+                <div style="color: #8e8e8e; font-size: 14px; margin-top: 8px;">
+                    Просмотров: {{ post.views }}
+                </div>
+
+                <a href="{% url 'post_detail' post.id %}" 
+                   style="text-decoration: none; color: #0095f6; font-size: 14px; display: block; margin-top: 5px;">
+                    Открыть подробнее...
+                </a>
+
+            </div>
+        </div>
+    {% empty %}
+        <div style="text-align: center; margin-top: 50px; color: #8e8e8e;">
+            <i class="bi bi-camera" style="font-size: 50px;"></i>
+            <p>Пока постов нет.</p>
+        </div>
+    {% endfor %}
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+
+    // LIKE AJAX
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            const postId = this.dataset.postId;
+            fetch(`/like/${postId}/`, {
+                method: 'GET',
+                headers: {'X-Requested-With':'XMLHttpRequest'}
+            })
+            .then(res => res.json())
+            .then(data => {
+                const icon = btn.querySelector('i');
+                if(data.liked){
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill');
+                    icon.style.color = 'red';
+                } else {
+                    icon.classList.remove('bi-heart-fill');
+                    icon.classList.add('bi-heart');
+                    icon.style.color = 'black';
+                }
+                document.getElementById(`like-count-${postId}`).innerText = data.like_count;
+            });
+        });
+    });
+
+    // COMMENT AJAX
+    document.querySelectorAll('.comment-form').forEach(form => {
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            const postId = this.dataset.postId;
+            const textInput = this.querySelector('input[name="text"]');
+            const text = textInput.value.trim();
+            if(!text) return;
+
+            const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch(`/comment/${postId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `text=${encodeURIComponent(text)}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(!data.error){
+                    const commentsDiv = document.getElementById(`comments-${postId}`);
+                    const newComment = document.createElement('div');
+                    newComment.innerHTML = `<b>${data.username}</b> ${data.text}`;
+                    commentsDiv.prepend(newComment);
+                    textInput.value = '';
+                }
+            });
+        });
+    });
+
+});
+</script>
+{% endblock %}

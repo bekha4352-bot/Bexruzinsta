@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+{% block title %}Reels{% endblock %}
+{% block content %}
+<style>
+.reels-shell { max-width: 540px; margin: 0 auto; }
+.reels-topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.reels-topbar h2 { margin:0; font-size:28px; }
+.reels-add-btn { text-decoration:none; background:#0095f6; color:#fff; padding:10px 14px; border-radius:10px; font-weight:600; }
+.reels-feed { display:flex; flex-direction:column; gap:18px; }
+.reel-card { position:relative; border-radius:18px; overflow:hidden; background:#000; min-height:78vh; display:flex; align-items:stretch; }
+.reel-media-wrap { flex:1; background:#000; display:flex; align-items:center; justify-content:center; }
+.reel-media-wrap video, .reel-media-wrap img { width:100%; height:78vh; object-fit:cover; display:block; background:#000; }
+.reel-overlay { position:absolute; inset:0; display:flex; justify-content:space-between; align-items:flex-end; padding:18px; background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.12) 42%, rgba(0,0,0,0)); color:#fff; pointer-events:none; }
+.reel-meta { max-width:72%; pointer-events:auto; }
+.reel-author { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.reel-author img { width:36px; height:36px; border-radius:50%; object-fit:cover; background:#eee; }
+.reel-author a { color:#fff; text-decoration:none; font-weight:700; }
+.reel-caption { margin:0; font-size:14px; line-height:1.4; word-break:break-word; }
+.reel-actions { display:flex; flex-direction:column; gap:16px; align-items:center; pointer-events:auto; }
+.action-btn { background:none; border:none; color:#fff; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; font-size:12px; }
+.action-btn i { font-size:28px; }
+.reel-comments { position:absolute; left:16px; right:16px; bottom:92px; max-height:180px; overflow:auto; display:none; padding:12px; border-radius:14px; background:rgba(0,0,0,.64); color:#fff; backdrop-filter: blur(6px); }
+.reel-comments.open { display:block; }
+.reel-comment-row { margin-bottom:8px; font-size:13px; }
+.reel-comment-form { position:absolute; left:16px; right:16px; bottom:18px; display:flex; gap:8px; pointer-events:auto; }
+.reel-comment-form input { flex:1; border:none; border-radius:999px; padding:12px 14px; }
+.reel-comment-form button { border:none; border-radius:999px; padding:0 16px; background:#0095f6; color:#fff; font-weight:600; }
+.empty-feed { text-align:center; color:#666; padding:56px 0; background:#fff; border-radius:16px; border:1px solid #dbdbdb; }
+@media (max-width: 700px) { .reels-shell { max-width:100%; } .reel-card { min-height:calc(100vh - 120px); border-radius:0; } .reel-media-wrap video, .reel-media-wrap img { height:calc(100vh - 120px); } }
+</style>
+
+<div class="reels-shell">
+    <div class="reels-topbar">
+        <h2>Reels</h2>
+        <a href="{% url 'add_reel' %}" class="reels-add-btn">+ Reel qo'shish</a>
+    </div>
+
+    <div class="reels-feed">
+        {% for item in feed_items %}
+            {% if item.type == 'reel' %}
+                {% with reel=item.obj %}
+                <section class="reel-card" id="reel-{{ reel.id }}">
+                    <div class="reel-media-wrap">
+                        <video controls playsinline preload="metadata">
+                            <source src="{{ reel.video.url }}">
+                        </video>
+                    </div>
+
+                    <div class="reel-overlay">
+                        <div class="reel-meta">
+                            <div class="reel-author">
+                                <img src="{{ reel.user.avatar.url }}" onerror="this.src='/media/avatar.jpg';" alt="{{ reel.user.username }}">
+                                <a href="{% url 'user_profile' reel.user.username %}">@{{ reel.user.username }}</a>
+                            </div>
+                            <p class="reel-caption">{{ reel.caption|default:"Caption yo'q" }}</p>
+                        </div>
+
+                        <div class="reel-actions">
+                            <button class="action-btn js-like-reel" data-reel-id="{{ reel.id }}">
+                                {% if reel.is_liked %}<i class="bi bi-heart-fill" style="color:#ff3040"></i>{% else %}<i class="bi bi-heart"></i>{% endif %}
+                                <span id="reel-like-count-{{ reel.id }}">{{ reel.like_count }}</span>
+                            </button>
+                            <button class="action-btn js-toggle-comments" data-target="reel-comments-{{ reel.id }}">
+                                <i class="bi bi-chat"></i>
+                                <span id="reel-comment-count-{{ reel.id }}">{{ reel.comment_count }}</span>
+                            </button>
+                            <button class="action-btn js-share" data-kind="reel" data-id="{{ reel.id }}">
+                                <i class="bi bi-send"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="reel-comments" id="reel-comments-{{ reel.id }}">
+                        <div id="reel-comments-list-{{ reel.id }}">
+                            {% for comment in reel.comments_preview %}
+                                <div class="reel-comment-row"><b>{{ comment.user.username }}</b> {{ comment.text }}</div>
+                            {% empty %}
+                                <div class="reel-comment-row" data-empty="1">Hozircha komment yo'q.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <form class="reel-comment-form js-reel-comment-form" data-reel-id="{{ reel.id }}">
+                        {% csrf_token %}
+                        <input type="text" name="text" placeholder="Komment yozing...">
+                        <button type="submit">Yuborish</button>
+                    </form>
+                </section>
+                {% endwith %}
+            {% else %}
+                {% with post=item.obj %}
+                <section class="reel-card" id="post-{{ post.id }}">
+                    <div class="reel-media-wrap">
+                        {% if post.video %}
+                            <video controls playsinline preload="metadata">
+                                <source src="{{ post.video.url }}">
+                            </video>
+                        {% elif post.image %}
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                        {% endif %}
+                    </div>
+
+                    <div class="reel-overlay">
+                        <div class="reel-meta">
+                            <div class="reel-author">
+                                <img src="{{ post.author.avatar.url }}" onerror="this.src='/media/avatar.jpg';" alt="{{ post.author.username }}">
+                                <a href="{% url 'user_profile' post.author.username %}">@{{ post.author.username }}</a>
+                            </div>
+                            <p class="reel-caption"><b>{{ post.title }}</b>{% if post.description %} — {{ post.description }}{% endif %}</p>
+                        </div>
+
+                        <div class="reel-actions">
+                            <button class="action-btn js-like-post" data-post-id="{{ post.id }}">
+                                {% if post.is_liked %}<i class="bi bi-heart-fill" style="color:#ff3040"></i>{% else %}<i class="bi bi-heart"></i>{% endif %}
+                                <span id="post-like-count-{{ post.id }}">{{ post.like_count }}</span>
+                            </button>
+                            <button class="action-btn js-toggle-comments" data-target="post-comments-{{ post.id }}">
+                                <i class="bi bi-chat"></i>
+                                <span id="post-comment-count-{{ post.id }}">{{ post.comments|length }}</span>
+                            </button>
+                            <button class="action-btn js-share" data-kind="post" data-id="{{ post.id }}">
+                                <i class="bi bi-send"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="reel-comments" id="post-comments-{{ post.id }}">
+                        <div id="post-comments-list-{{ post.id }}">
+                            {% for comment in post.comments %}
+                                <div class="reel-comment-row"><b>{{ comment.user.username }}</b> {{ comment.text }}</div>
+                            {% empty %}
+                                <div class="reel-comment-row" data-empty="1">Hozircha komment yo'q.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <form class="reel-comment-form js-post-comment-form" data-post-id="{{ post.id }}">
+                        {% csrf_token %}
+                        <input type="text" name="text" placeholder="Komment yozing...">
+                        <button type="submit">Yuborish</button>
+                    </form>
+                </section>
+                {% endwith %}
+            {% endif %}
+        {% empty %}
+            <div class="empty-feed">Hali hech narsa yo'q.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+(function(){
+    function postFormEncoded(url, token, text) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': token,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `text=${encodeURIComponent(text)}`
+        }).then(r => r.json());
+    }
+
+    document.querySelectorAll('.js-like-reel').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const reelId = btn.dataset.reelId;
+            fetch(`/reel/like/${reelId}/`)
+                .then(r => r.json())
+                .then(data => {
+                    const icon = btn.querySelector('i');
+                    if (data.liked) {
+                        icon.className = 'bi bi-heart-fill';
+                        icon.style.color = '#ff3040';
+                    } else {
+                        icon.className = 'bi bi-heart';
+                        icon.style.color = '#fff';
+                    }
+                    document.getElementById(`reel-like-count-${reelId}`).textContent = data.like_count;
+                });
+        });
+    });
+
+    document.querySelectorAll('.js-like-post').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const postId = btn.dataset.postId;
+            fetch(`/like/${postId}/`)
+                .then(r => r.json())
+                .then(data => {
+                    const icon = btn.querySelector('i');
+                    if (data.liked) {
+                        icon.className = 'bi bi-heart-fill';
+                        icon.style.color = '#ff3040';
+                    } else {
+                        icon.className = 'bi bi-heart';
+                        icon.style.color = '#fff';
+                    }
+                    document.getElementById(`post-like-count-${postId}`).textContent = data.like_count;
+                });
+        });
+    });
+
+    document.querySelectorAll('.js-toggle-comments').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = document.getElementById(btn.dataset.target);
+            if (target) target.classList.toggle('open');
+        });
+    });
+
+    document.querySelectorAll('.js-reel-comment-form').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const reelId = form.dataset.reelId;
+            const input = form.querySelector('input[name="text"]');
+            const text = input.value.trim();
+            if (!text) return;
+            const token = form.querySelector('[name=csrfmiddlewaretoken]').value;
+            postFormEncoded(`/reel/comment/${reelId}/`, token, text).then(data => {
+                if (data.error) return;
+                const list = document.getElementById(`reel-comments-list-${reelId}`);
+                const empty = list.querySelector('[data-empty="1"]');
+                if (empty) empty.remove();
+                const row = document.createElement('div');
+                row.className = 'reel-comment-row';
+                row.innerHTML = `<b>${data.username}</b> ${data.text}`;
+                list.prepend(row);
+                document.getElementById(`reel-comment-count-${reelId}`).textContent = data.comment_count;
+                input.value = '';
+            });
+        });
+    });
+
+    document.querySelectorAll('.js-post-comment-form').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const postId = form.dataset.postId;
+            const input = form.querySelector('input[name="text"]');
+            const text = input.value.trim();
+            if (!text) return;
+            const token = form.querySelector('[name=csrfmiddlewaretoken]').value;
+            postFormEncoded(`/comment/${postId}/`, token, text).then(data => {
+                if (data.error) return;
+                const list = document.getElementById(`post-comments-list-${postId}`);
+                const empty = list.querySelector('[data-empty="1"]');
+                if (empty) empty.remove();
+                const row = document.createElement('div');
+                row.className = 'reel-comment-row';
+                row.innerHTML = `<b>${data.username}</b> ${data.text}`;
+                list.prepend(row);
+                const countNode = document.getElementById(`post-comment-count-${postId}`);
+                countNode.textContent = Number(countNode.textContent || 0) + 1;
+                input.value = '';
+            });
+        });
+    });
+
+    document.querySelectorAll('.js-share').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const kind = btn.dataset.kind;
+            const id = btn.dataset.id;
+            const res = await fetch(`/share/${kind}/${id}/`);
+            const data = await res.json();
+            const url = data.url || window.location.href;
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: 'Instagram clone', url });
+                } else {
+                    await navigator.clipboard.writeText(url);
+                    alert('Link copy qilindi');
+                }
+            } catch (e) {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    alert('Link copy qilindi');
+                } catch (_) {}
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}

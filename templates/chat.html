@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .chat-wrapper { display: flex; height: 90vh; background: #fafafa; }
+    .chat-sidebar { width: 300px; border-right: 1px solid #ddd; padding: 15px; background: white; }
+    .chat-user { display: flex; align-items: center; padding: 10px; border-radius: 10px; text-decoration: none; color: black; }
+    .chat-user:hover { background: #f0f0f0; }
+    .chat-user img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+
+    .chat-main { flex: 1; display: flex; flex-direction: column; }
+    .chat-header { padding: 15px; border-bottom: 1px solid #ddd; display: flex; align-items: center; background: white; }
+    .chat-header img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+
+    .chat-body { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
+    .msg { max-width: 60%; padding: 10px 15px; border-radius: 15px; margin: 5px 0; word-wrap: break-word; }
+    .msg.my { align-self: flex-end; background: #0095f6; color: white; }
+    .msg.other { align-self: flex-start; background: #e4e6eb; }
+
+    .msg img, .msg video { max-width: 100%; border-radius: 10px; margin-top: 5px; }
+
+    .chat-send { display: flex; padding: 10px; border-top: 1px solid #ddd; background: white; }
+    .chat-send input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ccc; }
+    .chat-send button { margin-left: 10px; padding: 10px 15px; border: none; border-radius: 20px; background: #0095f6; color: white; }
+</style>
+
+<div class="chat-wrapper">
+
+    <!-- LEFT: Chat list -->
+    <div class="chat-sidebar">
+        <h3>Chats</h3>
+        {% for chat in chats %}
+        <a href="{% url 'chat' chat.user.id %}" class="chat-user">
+            <img src="{{ chat.user.avatar.url }}">
+            <span>{{ chat.user.username }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- RIGHT: Messages -->
+    <div class="chat-main">
+
+        <!-- Header -->
+        <div class="chat-header">
+            <img src="{{ receiver.avatar.url }}">
+            <a href="{% url 'user_profile' receiver.username %}">
+                <span>{{ receiver.username }}</span>
+            </a>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-body">
+            {% for message in messages %}
+                {% if message.sender == request.user %}
+                <div class="msg my">
+                    {% if message.image %}
+                        <img width="300" src="{{ message.image.url }}" alt="image">
+                    {% elif message.video %}
+                        <video width="300" controls>
+                            <source src="{{ message.video.url }}" type="video/mp4">
+                            Sizning brauzeringiz video tagni qo‘llab-quvvatlamaydi.
+                        </video>
+                    {% else %}
+                        {{ message.text }}
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="msg other">
+                    {% if message.image %}
+                        <img src="{{ message.image.url }}" alt="image">
+                    {% elif message.video %}
+                        <video controls>
+                            <source src="{{ message.video.url }}" type="video/mp4">
+                            Sizning brauzeringiz video tagni qo‘llab-quvvatlamaydi.
+                        </video>
+                    {% else %}
+                        {{ message.text }}
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Send -->
+        <form method="POST" class="chat-send">
+            {% csrf_token %}
+            <input type="text" name="text" placeholder="Xabar yoz..." required>
+            <button>Send</button>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

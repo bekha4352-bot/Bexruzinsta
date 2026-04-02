@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавить сторис{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 40px auto; background: white; border: 1px solid #dbdbdb; padding: 30px; border-radius: 8px; text-align: center;">
+    <h2 style="margin-bottom: 20px;">Добавить сторис</h2>
+
+    {% if error %}
+        <p style="color:red; margin-bottom:15px;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" style="text-align:left;">
+        {% csrf_token %}
+
+        <p style="margin-bottom: 15px;">
+            <label>Фото:</label>
+            <input type="file" name="image" accept="image/*"
+                   style="width:100%; padding:8px; border:1px solid #dbdbdb; background:#fafafa; border-radius:4px;">
+        </p>
+
+        <p style="margin-bottom: 15px;">
+            <label>Видео:</label>
+            <input type="file" name="video" accept="video/*"
+                   style="width:100%; padding:8px; border:1px solid #dbdbdb; background:#fafafa; border-radius:4px;">
+        </p>
+
+        <p style="font-size:13px; color:#777;">
+            Загрузи либо фото, либо видео.
+        </p>
+
+        <button type="submit"
+                style="width: 100%; background: #ff3040; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+            Опубликовать сторис
+        </button>
+    </form>
+
+    <p style="margin-top: 20px;">
+        <a href="{% url 'add_post' %}" style="color: #0095f6; text-decoration: none;">Назад</a>
+    </p>
+</div>
+{% endblock %}

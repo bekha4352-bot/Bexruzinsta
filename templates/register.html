@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #fafafa; }
+        .box { max-width: 420px; margin: 40px auto; background: white; border: 1px solid #dbdbdb; padding: 24px; }
+        input, textarea { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 12px; }
+        button { width: 100%; padding: 10px; background: #0095f6; color: white; border: none; }
+        .errors { color: #d93025; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Регистрация</h1>
+
+        {% if form.errors %}
+            <div class="errors">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+
+        <p><a href="{% url 'login' %}">Уже есть аккаунт? Войти</a></p>
+    </div>
+</body>
+</html>

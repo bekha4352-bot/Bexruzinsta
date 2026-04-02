@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .chat-item {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .badge-small {
+        background: red;
+        color: white;
+        border-radius: 50%;
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .chat-wrapper {
+        display: flex;
+        height: 90vh;
+        background: #fafafa;
+    }
+
+    /* Sidebar */
+    .chat-sidebar {
+        width: 300px;
+        border-right: 1px solid #ddd;
+        padding: 15px;
+        background: white;
+    }
+
+    .chat-user {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: black;
+    }
+
+    .chat-user:hover {
+        background: #f0f0f0;
+    }
+
+    .chat-user img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    /* Main */
+    .chat-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header */
+    .chat-header {
+        padding: 15px;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        align-items: center;
+        background: white;
+    }
+
+    .chat-header img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    /* Messages */
+    .chat-body {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .msg {
+        max-width: 60%;
+        padding: 10px 15px;
+        border-radius: 15px;
+        margin: 5px 0;
+    }
+
+    .msg.my {
+        align-self: flex-end;
+        background: #0095f6;
+        color: white;
+    }
+
+    .msg.other {
+        align-self: flex-start;
+        background: #e4e6eb;
+    }
+
+    /* Send */
+    .chat-send {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        background: white;
+    }
+
+    .chat-send input {
+        flex: 1;
+        padding: 10px;
+        border-radius: 20px;
+        border: 1px solid #ccc;
+    }
+
+    .chat-send button {
+        margin-left: 10px;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 20px;
+        background: #0095f6;
+        color: white;
+    }
+</style>
+<div class="chat-wrapper">
+
+    <!-- LEFT: Chat list -->
+    <div class="chat-sidebar">
+        <h3>Chats</h3>
+
+        {% for chat in chats %}
+        <a href="{% url 'chat' chat.user.id %}" class="chat-item">
+
+            <img src="{{ chat.user.avatar.url }}" width="40">
+
+            <span>{{ chat.user.username }}</span>
+
+            {% if chat.unread > 0 %}
+            <span class="badge-small">{{ chat.unread }}</span>
+            {% endif %}
+
+        </a>
+        {% endfor %}
+    </div>
+
+
+
+</div>
+
+{% endblock %}

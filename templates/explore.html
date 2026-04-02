@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Reels • Instagram</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            height: 100vh;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        /* Reels Container */
+        .reels-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            background: #000;
+            position: relative;
+        }
+
+        /* Individual Reel Item */
+        .reel-item {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            scroll-snap-align: start;
+            background: #000;
+            overflow: hidden;
+        }
+
+        /* Media Wrapper */
+        .reel-media {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        video, .reel-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Gradient Overlay for better text visibility */
+        .reel-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            pointer-events: none;
+        }
+
+        /* Top Info Section */
+        .reel-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-area i {
+            font-size: 24px;
+            color: white;
+        }
+
+        .logo-area span {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .camera-icon {
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* User Info */
+        .user-info {
+            position: absolute;
+            bottom: 100px;
+            left: 16px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .avatar img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+        .username {
+            font-weight: 700;
+            font-size: 15px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .follow-btn {
+            background: transparent;
+            border: none;
+            color: #0095f6;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
+        .caption {
+            position: absolute;
+            bottom: 65px;
+            left: 16px;
+            right: 70px;
+            z-index: 10;
+            font-size: 14px;
+            color: white;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .caption-text {
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .caption-text strong {
+            font-weight: 700;
+            margin-right: 6px;
+        }
+
+        .audio-info {
+            position: absolute;
+            bottom: 65px;
+            right: 70px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .audio-info i {
+            font-size: 12px;
+            color: white;
+        }
+
+        .audio-info span {
+            font-size: 11px;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* Right Side Actions */
+        .reel-actions {
+            position: absolute;
+            right: 12px;
+            bottom: 100px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .action-btn i {
+            font-size: 28px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .action-btn span {
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .liked {
+            color: #ed4956 !important;
+        }
+
+        /* Comment Input Section */
+        .comment-section {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(15px);
+            padding: 12px 16px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            z-index: 20;
+            border-top: 0.5px solid rgba(255,255,255,0.2);
+        }
+
+        .comment-section.active {
+            transform: translateY(0);
+        }
+
+        .comment-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .comment-input-wrapper input {
+            flex: 1;
+            background: #262626;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 25px;
+            color: white;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+
+        .comment-input-wrapper input::placeholder {
+            color: #8e8e8e;
+        }
+
+        .comment-input-wrapper button {
+            background: #0095f6;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .comment-input-wrapper button:active {
+            opacity: 0.7;
+        }
+
+        .close-comment {
+            position: absolute;
+            top: -30px;
+            right: 16px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 30px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Loading Animation */
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            z-index: 1000;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .reel-actions {
+                right: 12px;
+                gap: 20px;
+            }
+            .action-btn i {
+                font-size: 26px;
+            }
+            .caption {
+                font-size: 13px;
+                bottom: 60px;
+            }
+        }
+
+        /* Mute/Unmute Indicator */
+        .mute-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 15;
+            backdrop-filter: blur(4px);
+        }
+
+        .mute-indicator i {
+            font-size: 18px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="reels-container" id="reelsContainer">
+    {% for reel in posts %}
+    <div class="reel-item" data-reel-id="{{ reel.id }}" data-index="{{ forloop.counter0 }}">
+        <div class="reel-media">
+            {% if reel.video %}
+            <video class="reel-video" src="{{ reel.video.url }}" loop muted playsinline></video>
+            {% elif reel.image %}
+            <img src="{{ reel.image.url }}" alt="Reel media">
+            {% endif %}
+            <div class="reel-overlay"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="reel-header">
+            <div class="logo-area">
+                <i class="fab fa-instagram"></i>
+                <span>Reels</span>
+            </div>
+            <i class="fas fa-camera camera-icon"></i>
+        </div>
+
+        <!-- User Info -->
+        <div class="user-info">
+            <div class="avatar" onclick="location.href='/profile/{{ posts.user.id }}/'">
+                {% if post.user.avatar %}
+                <img src="{{ post.user.avatar.url }}" alt="{{ post.user.username }}">
+                {% else %}
+                <img src="https://ui-avatars.com/api/?background=0D8F36&color=fff&rounded=true&bold=true&size=38&name={{ reel.user.username|slice:':2' }}" alt="avatar">
+                {% endif %}
+            </div>
+            <div>
+                <span class="username" onclick="location.href='/profile/{{ post.user.id }}/'">{{ post.user.username }}</span>
+                <button class="follow-btn" onclick="followUser({{ reel.user.id }}, this)">Follow</button>
+            </div>
+        </div>
+
+        <!-- Caption -->
+        <div class="caption">
+            <div class="caption-text">
+                <strong>{{ posts.user.username }}</strong> {{ reel.caption|default:"Check out this reel! 🔥" }}
+            </div>
+        </div>
+
+        <!-- Audio Info -->
+        <div class="audio-info">
+            <i class="fas fa-music"></i>
+            <span>{{ reel.audio_name|default:"Original Audio" }}</span>
+        </div>
+
+        <!-- Right Side Actions -->
+        <div class="reel-actions">
+            <div class="action-btn" onclick="toggleLike({{ reel.id }}, this)">
+                <i class="fas fa-heart {% if reel.liked_by_user %}liked{% endif %}"></i>
+                <span class="like-count">{{ reel.likes_count|default:0 }}</span>
+            </div>
+            <div class="action-btn" onclick="openCommentBox(this)">
+                <i class="fas fa-comment"></i>
+                <span class="comment-count">{{ reel.comments_count|default:0 }}</span>
+            </div>
+            <div class="action-btn" onclick="shareReel({{ reel.id }})">
+                <i class="fas fa-paper-plane"></i>
+                <span>Share</span>
+            </div>
+            <div class="action-btn" onclick="toggleSave({{ reel.id }}, this)">
+                <i class="far fa-bookmark"></i>
+                <span>Save</span>
+            </div>
+        </div>
+
+        <!-- Mute/Unmute Button -->
+        <div class="mute-indicator" onclick="toggleMute(this)">
+            <i class="fas fa-volume-mute"></i>
+        </div>
+
+        <!-- Comment Input Section -->
+        <div class="comment-section">
+            <div class="close-comment" onclick="closeCommentBox(this)">Cancel</div>
+            <div class="comment-input-wrapper">
+                <input type="text" placeholder="Add a comment..." class="comment-input">
+                <button onclick="sendComment({{ reel.id }}, this)">Post</button>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; color: white; text-align: center;">
+        <div>
+            <i class="fas fa-film" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+            <p>No reels yet</p>
+            <p style="font-size: 14px; opacity: 0.7;">Check back later!</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Auto-play videos on scroll with Intersection Observer
+    const videos = document.querySelectorAll('.reel-video');
+    const reelItems = document.querySelectorAll('.reel-item');
+    
+    // Mute state tracking
+    let muteStates = new Map();
+    
+    // Initialize mute states
+    videos.forEach(video => {
+        muteStates.set(video, true); // all muted by default
+        video.muted = true;
+    });
+    
+    // Intersection Observer for video autoplay
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const video = entry.target.querySelector('.reel-video');
+            if (!video) return;
+            
+            if (entry.isIntersecting) {
+                // Play video when visible
+                video.play().catch(e => console.log('Autoplay prevented:', e));
+                // Update mute indicator icon
+                const muteBtn = entry.target.querySelector('.mute-indicator i');
+                if (muteBtn) {
+                    muteBtn.className = video.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+                }
+            } else {
+                // Pause video when not visible
+                video.pause();
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    reelItems.forEach(item => {
+        observer.observe(item);
+    });
+    
+    // Like function with AJAX
+    function toggleLike(reelId, element) {
+        const heartIcon = element.querySelector('i');
+        const likeCountSpan = element.querySelector('.like-count');
+        let currentCount = parseInt(likeCountSpan.innerText) || 0;
+        
+        fetch(`/reels/like_toggle/${reelId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.liked) {
+                heartIcon.classList.add('liked');
+                likeCountSpan.innerText = currentCount + 1;
+                // Add like animation
+                heartIcon.style.transform = 'scale(1.3)';
+                setTimeout(() => { heartIcon.style.transform = ''; }, 200);
+            } else {
+                heartIcon.classList.remove('liked');
+                likeCountSpan.innerText = Math.max(0, currentCount - 1);
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    }
+    
+    // Follow user function
+    function followUser(userId, button) {
+        fetch(`/follow_toggle/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.following) {
+                button.innerText = 'Following';
+                button.style.color = '#8e8e8e';
+            } else {
+                button.innerText = 'Follow';
+                button.style.color = '#0095f6';
+            }
+        })
+        .catch(err => console.error('Follow error:', err));
+    }
+    
+    // Open comment box
+    function openCommentBox(element) {
+        const reelItem = element.closest('.reel-item');
+        const commentSection = reelItem.querySelector('.comment-section');
+        const allCommentSections = document.querySelectorAll('.comment-section');
+        
+        // Close all other comment sections
+        allCommentSections.forEach(section => {
+            if (section !== commentSection) {
+                section.classList.remove('active');
+            }
+        });
+        
+        commentSection.classList.toggle('active');
+        const input = commentSection.querySelector('.comment-input');
+        if (commentSection.classList.contains('active')) {
+            input.focus();
+        }
+    }
+    
+    function closeCommentBox(element) {
+        const commentSection = element.closest('.comment-section');
+        commentSection.classList.remove('active');
+    }
+    
+    // Send comment
+    function sendComment(reelId, button) {
+        const commentSection = button.closest('.comment-section');
+        const input = commentSection.querySelector('.comment-input');
+        const commentText = input.value.trim();
+        
+        if (!commentText) {
+            input.placeholder = "Can't send empty comment!";
+            input.style.border = "1px solid #ed4956";
+            setTimeout(() => {
+                input.placeholder = "Add a comment...";
+                input.style.border = "none";
+            }, 2000);
+            return;
+        }
+        
+        fetch(`/reels/add_comment/${reelId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ text: commentText })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                input.value = '';
+                commentSection.classList.remove('active');
+                // Update comment count
+                const reelItem = button.closest('.reel-item');
+                const commentCountSpan = reelItem.querySelector('.action-btn:nth-child(2) .comment-count');
+                let currentCount = parseInt(commentCountSpan.innerText) || 0;
+                commentCountSpan.innerText = currentCount + 1;
+                
+                // Show toast-like feedback
+                showToast('Comment added! 💬');
+            } else {
+                showToast('Failed to add comment', 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Comment error:', err);
+            showToast('Something went wrong', 'error');
+        });
+    }
+    
+    // Share reel
+    function shareReel(reelId) {
+        const shareUrl = `${window.location.origin}/reels/${reelId}/`;
+        if (navigator.share) {
+            navigator.share({
+                title: 'Check out this reel!',
+                url: shareUrl,
+            }).catch(err => console.log('Share cancelled'));
+        } else {
+            navigator.clipboard.writeText(shareUrl);
+            showToast('Link copied to clipboard! 📋');
+        }
+    }
+    
+    // Toggle save
+    function toggleSave(reelId, element) {
+        const saveIcon = element.querySelector('i');
+        fetch(`/reels/save_toggle/${reelId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.saved) {
+                saveIcon.className = 'fas fa-bookmark';
+                showToast('Saved to collection');
+            } else {
+                saveIcon.className = 'far fa-bookmark';
+                showToast('Removed from saved');
+            }
+        })
+        .catch(err => console.error('Save error:', err));
+    }
+    
+    // Toggle mute/unmute for video
+    function toggleMute(element) {
+        const reelItem = element.closest('.reel-item');
+        const video = reelItem.querySelector('.reel-video');
+        if (!video) return;
+        
+        video.muted = !video.muted;
+        const icon = element.querySelector('i');
+        if (video.muted) {
+            icon.className = 'fas fa-volume-mute';
+        } else {
+            icon.className = 'fas fa-volume-up';
+        }
+    }
+    
+    // Simple toast notification
+    function showToast(message, type = 'success') {
+        let toast = document.querySelector('.toast-notification');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '80px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            toast.style.backdropFilter = 'blur(10px)';
+            toast.style.color = 'white';
+            toast.style.padding = '12px 24px';
+            toast.style.borderRadius = '30px';
+            toast.style.fontSize = '14px';
+            toast.style.fontWeight = '500';
+            toast.style.zIndex = '10000';
+            toast.style.whiteSpace = 'nowrap';
+            document.body.appendChild(toast);
+        }
+        
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, 300);
+        }, 2000);
+    }
+    
+    // Get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Handle video playback when clicked (optional)
+    document.querySelectorAll('.reel-media').forEach(media => {
+        media.addEventListener('click', (e) => {
+            // Don't trigger if clicking on action buttons
+            if (e.target.closest('.action-btn') || e.target.closest('.mute-indicator') || e.target.closest('.comment-section')) return;
+            
+            const video = media.querySelector('.reel-video');
+            if (video) {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
+        });
+    });
+    
+    // Preload first video
+    if (videos.length > 0) {
+        videos[0].play().catch(e => console.log('Autoplay blocked, user interaction needed'));
+    }
+    
+    // Keyboard navigation (optional)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            const currentIndex = Array.from(reelItems).findIndex(item => {
+                const rect = item.getBoundingClientRect();
+                return rect.top >= -100 && rect.top <= window.innerHeight / 2;
+            });
+            
+            let nextIndex = currentIndex;
+            if (e.key === 'ArrowUp' && currentIndex > 0) nextIndex = currentIndex - 1;
+            if (e.key === 'ArrowDown' && currentIndex < reelItems.length - 1) nextIndex = currentIndex + 1;
+            
+            if (nextIndex !== currentIndex) {
+                reelItems[nextIndex].scrollIntoView({ behavior: 'smooth' });
+                e.preventDefault();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
